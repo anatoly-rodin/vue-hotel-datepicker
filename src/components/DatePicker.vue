@@ -469,7 +469,8 @@ $black:                #000;
 $gray:                 #424b53;
 $primary-text-color:   #35343d;
 $lightest-gray:        #f3f5f8;
-$primary-color: #00ca9d;
+//$primary-color: #00ca9d;
+$primary-color: #1f9d93;
 $primary-color: $primary-color;
 $medium-gray: #999999;
 $light-gray: #d7d9e2;
@@ -517,6 +518,9 @@ $font-small: 14px;
     display: inline-block;
     width: 100%;
     height: 48px;
+      font-family: 'PT Sans', sans-serif;
+      font-weight: bold;
+      font-size: 14px;
     background: $white url('calendar_icon.regular.svg') no-repeat 17px center / 16px;
   }
 
@@ -565,6 +569,7 @@ $font-small: 14px;
     color: $primary-text-color;
     padding-top: 0;
     font-size: $font-small;
+      font-weight: bold;
     float: left;
     height: 48px;
     line-height: 3.1;
@@ -680,7 +685,7 @@ $font-small: 14px;
   }
 
   &__month-button {
-    background: transparent url('ic-arrow-right-green.regular.svg') no-repeat right center / 8px;
+    background: transparent url('ic-arrow-right-green.regular.svg') no-repeat right center / 16px;
     cursor: pointer;
     display: inline-block;
     height: 60px;
@@ -732,7 +737,8 @@ $font-small: 14px;
   }
 
   &__month {
-    font-size: 12px;
+    //font-size: 12px;
+      font-size: 14px;
     float: left;
     width: 50%;
     padding-right: 10px;
@@ -764,7 +770,8 @@ $font-small: 14px;
 
   &__month-name {
     font-size: 16px;
-    font-weight: 500;
+    //font-weight: 500;
+      font-weight: bold;
     margin-top: -40px;
     padding-bottom: 17px;
     pointer-events: none;
@@ -800,8 +807,10 @@ $font-small: 14px;
   &__week-name {
     width: calc(100% / 7);
     float: left;
-    font-size: 12px;
-    font-weight: 400;
+    //font-size: 12px;
+      font-size: 14px;
+    //font-weight: 400;
+      font-weight: bold;
     color: $medium-gray;
     text-align: center;
   }
@@ -827,7 +836,8 @@ $font-small: 14px;
     appearence: none;
     background: transparent;
     border: 0;
-    color: $primary-color;
+    //color: $primary-color;
+      color: #ff3800;
     cursor: pointer;
     font-size: 25px;
     font-weight: bold;
