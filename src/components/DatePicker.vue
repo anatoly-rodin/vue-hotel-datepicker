@@ -548,7 +548,7 @@ $font-small: 14px;
   }
 
   &__dummy-wrapper {
-    border: solid 1px $light-gray;
+    //border: solid 1px $light-gray;
     cursor: pointer;
     display: block;
     float: left;
@@ -561,7 +561,7 @@ $font-small: 14px;
     }
 
     &--is-active {
-      border: 1px solid $primary-color;
+      //border: 1px solid $primary-color;
     }
   }
 
