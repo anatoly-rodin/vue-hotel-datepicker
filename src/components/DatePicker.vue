@@ -453,6 +453,7 @@ $extra-small-screen: '(max-width: 23em)';
 .square {
   width: calc(100% / 7);
   float: left;
+    cursor: pointer;
 }
 
 *,
