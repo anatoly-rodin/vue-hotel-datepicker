@@ -501,7 +501,8 @@ $font-small: 14px;
   }
 
   &--open {
-    box-shadow: 0 15px 30px 10px rgba($black, .08);
+    //box-shadow: 0 15px 30px 10px rgba($black, .08);
+      box-shadow: 0 0 13px rgba(9,9,9,.48);
     max-height: 900px;
 
     @include device($up-to-tablet) {
@@ -518,7 +519,7 @@ $font-small: 14px;
     position: relative;
     display: inline-block;
     width: 100%;
-    height: 48px;
+    height: 100%;
       font-family: 'PT Sans', sans-serif;
       font-weight: bold;
       font-size: 14px;
