@@ -491,7 +491,7 @@ $font-small: 14px;
   line-height: 14px;
   overflow: hidden;
   left: 0;
-  top: 48px;
+  top: 50px;
   position: absolute;
   z-index: 10;
 
