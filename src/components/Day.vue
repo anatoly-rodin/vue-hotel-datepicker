@@ -1,11 +1,14 @@
 <template lang='pug'>
   div
-    span
     .datepicker__tooltip(v-if='showTooltip && this.options.hoveringTooltip' v-html='tooltipMessageDisplay')
     .datepicker__month-day(
-      @click='dayClicked(date)'
-      v-text='`${dayNumber}`'
+      @click.prevent.stop='dayClicked(date)'
+      @keyup.enter.prevent.stop='dayClicked(date)'
+      v-text='dayNumber'
       :class='dayClass'
+      :style='isToday ? "border: 1px solid #00c690" : ""'
+      :tabindex="tabIndex"
+      ref="day"
     )
 </template>
 
@@ -18,6 +21,10 @@ export default {
   name: 'Day',
 
   props: {
+    isOpen: {
+      type: Boolean,
+      required: true,
+    },
     sortedDisabledDates: {
       type: Array
     },
@@ -58,6 +65,9 @@ export default {
     tooltipMessage: {
       default: null,
       type: String
+    },
+    currentDateStyle:{
+      required: true,
     }
   },
 
@@ -66,29 +76,39 @@ export default {
       isHighlighted: false,
       isDisabled: false,
       allowedCheckoutDays: [],
+      currentDate: new Date(),
     };
   },
 
   computed: {
-    nightsCount: function() {
+    tabIndex() {
+      if (!this.isOpen || !this.belongsToThisMonth || this.isDisabled || !this.isClickable()) {
+        return -1;
+      }
+      return 0
+    },
+    nightsCount() {
       return this.countDays(this.checkIn, this.hoveringDate);
     },
-    tooltipMessageDisplay: function() {
+    tooltipMessageDisplay() {
       return this.tooltipMessage
       ? this.tooltipMessage
       : `${this.nightsCount} ${this.nightsCount !== 1 ?
               this.options.i18n['nights'] : this.options.i18n['night']}`
     },
-    showTooltip: function() {
+    showTooltip() {
       return  !this.isDisabled &&
               this.date == this.hoveringDate &&
               this.checkIn !== null &&
               this.checkOut == null;
     },
 
-    dayClass: function(){
-      if (this.belongsToThisMonth) {
+    isToday() {
+      return this.compareDay(this.currentDate, this.date) == 0;
+    },
 
+    dayClass(){
+      if (this.belongsToThisMonth) {
         // If the calendar has a minimum number of nights
         if ( !this.isDisabled &&
              this.compareDay(this.date, this.checkIn) == 1 &&
@@ -104,19 +124,19 @@ export default {
         if (this.options.allowedRanges.length !== 0) {
           if ( !this.isDisabled && this.checkIn !== null && this.checkOut == null ) {
             // If the day is one of the allowed check out days and is not highlighted
-            if ( _.some(  this.allowedCheckoutDays, (i) => this.compareDay(i, this.date) == 0 && !this.isHighlighted) ) {
+            if ( this.allowedCheckoutDays.some((i) => this.compareDay(i, this.date) == 0 && !this.isHighlighted) ) {
               return 'datepicker__month-day--allowed-checkout'
             }
             // If the day is one of the allowed check out days and is highlighted
-            if ( _.some(  this.allowedCheckoutDays, (i) => this.compareDay(i, this.date) == 0 && this.isHighlighted) ) {
+            if ( this.allowedCheckoutDays.some((i) => this.compareDay(i, this.date) == 0 && this.isHighlighted) ) {
               return 'datepicker__month-day--selected datepicker__month-day--allowed-checkout'
             }
             // If the day is not one of the allowed Checkout Days and is highlighted
-            if ( !(_.some(  this.allowedCheckoutDays, (i) => this.compareDay(i, this.date) == 0 )) && this.isHighlighted) {
+            if ( !(this.allowedCheckoutDays.some((i) => this.compareDay(i, this.date) == 0 )) && this.isHighlighted) {
               return 'datepicker__month-day--out-of-range datepicker__month-day--selected'
             }
             else {
-              return 'datepicker__month-day datepicker__month-day--out-of-range'
+              return 'datepicker__month-day--out-of-range'
             }
           }
         }
@@ -147,7 +167,7 @@ export default {
   },
 
   watch: {
-    hoveringDate: function(date) {
+    hoveringDate(date) {
       if ( this.checkIn !== null  && this.checkOut == null && this.isDisabled == false) {
         this.isDateLessOrEquals(this.checkIn, this.date) &&
         this.isDateLessOrEquals(this.date, this.hoveringDate) ?
@@ -157,7 +177,7 @@ export default {
 
       }
     },
-    activeMonthIndex: function(index) {
+    activeMonthIndex(index) {
       this.checkIfDisabled()
       this.checkIfHighlighted()
       if ( this.checkIn !== null  && this.checkOut !== null ) {
@@ -171,16 +191,24 @@ export default {
       }
 
     },
-    nextDisabledDate: function() {
+    nextDisabledDate() {
       this.disableNextDays();
     },
-    checkIn: function(date) {
+    checkIn(date) {
       this.createAllowedCheckoutDays(date);
     }
   },
 
   methods: {
     ...Helpers,
+
+    isClickable() {
+      if (this.$refs && this.$refs.day) {
+        return getComputedStyle(this.$refs.day).pointerEvents !== 'none';
+      } else {
+        return true;
+      }
+    },
 
     compareDay(day1, day2) {
       const date1 = fecha.format(new Date(day1), 'YYYYMMDD');
@@ -194,7 +222,7 @@ export default {
     },
 
     dayClicked(date) {
-      if (this.isDisabled) {
+      if (this.isDisabled || !this.isClickable()) {
         return
       }
       else {
@@ -211,7 +239,7 @@ export default {
 
         if (this.options.enableCheckout) { nextDisabledDate = Infinity; }
 
-        this.$emit('dayClicked', { date, nextDisabledDate });
+        this.$emit('day-clicked', { date, nextDisabledDate });
       }
     },
 
@@ -224,17 +252,15 @@ export default {
     checkIfDisabled() {
       this.isDisabled =
         // If this day is equal any of the disabled dates
-        _.some(
-          this.sortedDisabledDates, (i) =>
+        (this.sortedDisabledDates ? this.sortedDisabledDates.some((i) =>
           this.compareDay(i, this.date) == 0
-        )
+        ) : null)
         // Or is before the start date
         || this.compareDay(this.date, this.options.startDate) == -1
         // Or is after the end date
         || this.compareEndDay()
         // Or is in one of the disabled days of the week
-        || _.some(
-          this.options.disabledDaysOfWeek, (i) =>
+        || this.options.disabledDaysOfWeek.some((i) =>
           i == fecha.format(this.date, 'dddd')
         );
         // Handle checkout enabled
@@ -256,8 +282,7 @@ export default {
 
     createAllowedCheckoutDays(date){
       this.allowedCheckoutDays = [];
-      _.forEach(
-        this.options.allowedRanges, (i) =>
+      this.options.allowedRanges.forEach((i) =>
         this.allowedCheckoutDays.push(this.addDays(date, i))
       )
       this.allowedCheckoutDays.sort((a, b) =>  a - b );
